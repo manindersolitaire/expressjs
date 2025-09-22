@@ -1,24 +1,39 @@
 import express from 'express'
 import { searchController, userLogin, usernameController } from './controllers.js'
 import router from './routes.js'
+import multer from 'multer'
+import {storage} from './config/multer.js'
 
 const app =  express()
+const upload =  multer(
+    {
+    storage : storage,
+    limits : {
+        fileSize : 1024000
+    }
 
+})
 const PORT = 3000
+
+
+app.use(express.urlencoded({extended : true}))
+app.use(upload.single('image'))
+// app.use(express.static('public'))
+// app.use('/images', express.static('images'))
 
 // Set EJS
 
-app.set('view engine', 'ejs')
+// app.set('view engine', 'ejs')
 
 
-app.use((req,res,next)=>{
-    console.log('Start')
+// app.use((req,res,next)=>{
+//     console.log('Start')
 
-    res.on('finish', ()=>{
-        console.log('End')
-    })
-    next()
-})
+//     res.on('finish', ()=>{
+//         console.log('End')
+//     })
+//     next()
+// })
 // Define a simple route
 
 // app.get('/', (req,res)=> {
@@ -51,12 +66,18 @@ app.use('/user', router)
 
 // POST
 
-app.post('/create', express.json() , (req,res)=>{
-    const {name, email} = req.body
+// app.post('/create', express.json() , (req,res)=>{
+//     const {name, email} = req.body
 
-    res.json({
-        message : `User ${name} and Email ${email}`
-    })
+//     res.json({
+//         message : `User ${name} and Email ${email}`
+//     })
+// })
+
+app.post('/form', (req,res)=>{
+    console.log(req.body)
+    console.log(req.file)
+    res.send('Form Submitted..')
 })
 
 
