@@ -5,3 +5,5 @@ const stoarge =  multer.diskStorage({
         cb(null,file.originalname)
     } 
 })
+
+export default stoarge

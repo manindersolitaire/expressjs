@@ -1,23 +1,29 @@
 import express from 'express'
 import { searchController, userLogin, usernameController } from './controllers.js'
 import router from './routes.js'
-import multer from 'multer'
-import {storage} from './config/multer.js'
+import { connectDB } from './config/db.js'
+import Person from './models/Person.js'
+// import multer from 'multer'
+// import storage from './config/multer.js'
+// import mongoose from 'mongoose'
+
 
 const app =  express()
-const upload =  multer(
-    {
-    storage : storage,
-    limits : {
-        fileSize : 1024000
-    }
+// const upload =  multer(
+//     {
+//     storage : storage,
+//     limits : {
+//         fileSize : 1024000
+//     }
 
-})
+// })
 const PORT = 3000
 
-
+// Database Connect
+await connectDB()
+app.use(express.json())
 app.use(express.urlencoded({extended : true}))
-app.use(upload.single('image'))
+// app.use(upload.single('image'))
 // app.use(express.static('public'))
 // app.use('/images', express.static('images'))
 
@@ -74,30 +80,65 @@ app.use('/user', router)
 //     })
 // })
 
-app.post('/form', (req,res)=>{
+// app.post('/form', (req,res)=>{
+//     console.log(req.body)
+//     console.log(req.file)
+//     res.send('Form Submitted..')
+// })
+
+
+// app.put('/create/:id', express.json() ,(req,res) =>{
+//     const userId =  req.params.id
+//     const {name,email} = req.body
+
+//     res.json({
+//         message : `User ${userId} updated to ${name}, ${email}`
+//     })
+
+// })
+
+// app.delete('/delete/:id', (req,res)=>{
+//     const userId = req.params.id
+//     res.json({
+//         message : `User with ID ${userId} deleted Successfully`
+//     })
+// } )
+
+// Create person
+app.post('/person', async (req,res)=>{
     console.log(req.body)
-    console.log(req.file)
-    res.send('Form Submitted..')
+
+    const {email , name , age} = req.body
+    const newPerson = new Person({
+        email,
+        name,
+        age
+    })
+    await newPerson.save()
+    res.send('Person Added')
+})
+// Update Record
+app.put('/person', async (req,res)=>{
+    const {id} = req.body
+
+    const personData =  await Person.findByIdAndUpdate(id,{
+        age : '25'
+    })
+   
+    personData.save()
+    console.log(personData)
+   
+    res.send('Person Added')
 })
 
 
-app.put('/create/:id', express.json() ,(req,res) =>{
-    const userId =  req.params.id
-    const {name,email} = req.body
+// Delete 
 
-    res.json({
-        message : `User ${userId} updated to ${name}, ${email}`
-    })
-
+app.delete('/person/:id', async (req,res)=>{
+    const {id} = req.params
+    await Person.findByIdAndDelete(id)
+    res.send('Person Deleted')
 })
-
-app.delete('/delete/:id', (req,res)=>{
-    const userId = req.params.id
-    res.json({
-        message : `User with ID ${userId} deleted Successfully`
-    })
-} )
-
 app.listen(PORT, ()=> {
     console.log(`Server Running on port ${PORT}`)
 })
